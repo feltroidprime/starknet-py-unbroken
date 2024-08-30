@@ -43,6 +43,7 @@ ABI_EBNF = """
     type_bool: "core::bool"
     type_uint: "core::integer::u" INT
     type_bounded_int: "core::internal::BoundedInt::<" INT "," WS? INT ">"
+    type_bounded_int_280: "core::internal::bounded_int::BoundedInt::<" INT "," WS? INT ">"
     type_contract_address: "core::starknet::contract_address::ContractAddress"
     type_class_hash: "core::starknet::class_hash::ClassHash"
     type_storage_address: "core::starknet::storage_access::StorageAddress"
@@ -113,6 +114,17 @@ class ParserTransformer(Transformer):
         return UintType(int(value[0]))
 
     def type_bounded_int(self, value: List[Token]) -> UintType:
+        """
+        BoundedInt Uint type contains information about its ranges. They are present in the value[0] and value[2].
+        """
+        if value[0] != "0":
+            raise ValueError("BoundedInt should start from 0.")
+
+        bits = log2(int(value[2]) + 1)
+
+        return UintType(int(bits))
+
+    def type_bounded_int_280(self, value: List[Token]) -> UintType:
         """
         BoundedInt Uint type contains information about its ranges. They are present in the value[0] and value[2].
         """
